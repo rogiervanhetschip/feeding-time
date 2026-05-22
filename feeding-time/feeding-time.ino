@@ -2,6 +2,14 @@
 #include <DS3231.h>
 #include <Time.h>
 #include <TimeAlarms.h>
+#include <Stepper.h>
+
+const int stepsPerRevolution = 2048;  // change this to fit the number of steps per revolution
+
+// initialize the stepper library on pins 10, 12, 11, 13
+Stepper myStepper(stepsPerRevolution, 10, 12, 11, 13);
+int stepCount = 0;  // number of steps the motor has taken
+int rpm = 10;
 
 void setup() {
   Serial.begin(9600);
@@ -33,7 +41,7 @@ void setClock() {
 void setAlarms()
 {
   // TimeAlarms library can store at most 6 alarms
-  Alarm.alarmRepeat(20,45,0, feedAnimals);  // 20:45 every day
+  Alarm.alarmRepeat(21,00,0, feedAnimals);  // 20:45 every day
 }
 
 void loop() {
@@ -59,14 +67,19 @@ void printDigits(int digits)
 }
 
 void feedAnimals()
-{
-  digitalWrite(10, HIGH); // Start motor
-
-  // Play sound
   // Turn on lights
-  // Send signal to HomeAssistant via lora
+{
+   int motorSpeed(rpm);
+  // set the motor speed:
+  if (motorSpeed > 0) {
+    myStepper.setSpeed(rpm); 
+    // step 1/100 of a revolution:
+    myStepper.step(stepsPerRevolution);
+  } 
+  delay(50000); // Wait 50 seconds
+ // Play sound
+ // Send signal to HomeAssistant via lora
+  
 
-  delay(10000); // Wait 10 seconds
-
-  digitalWrite(10, LOW); // Stop running motor
+  
 }
